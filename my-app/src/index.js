@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
+/*
 class Square extends React.Component {
     render() {
       return (
@@ -16,35 +17,40 @@ class Square extends React.Component {
       );
     }
   }
-  
+  */
+
+  // Instead of using a class we can make square a function component -- it also eliminates the need for this
+  // we use a function component when we only need a render and don't keep state. Since Board keeps state, we changed this.
+  function Square(props){
+      return (
+          <button className="square" onClick={props.onClick}>
+              {props.value}
+          </button>
+      )
+  }
+
   class Board extends React.Component {
       constructor(props)
       {
           super(props);
           this.state= {
               squares: Array(9).fill(null),
-              player: 'X',
+              player: true,
         };
       }
 
       handleClick(i)
       {
+          //slice makes a copy of the array so we dont have to make a immutable copy of the array
         const squares = this.state.squares.slice();
-        if( this.state.player === 'X')
-        {
-            squares[i] = this.state.player;
-            this.setState({
-                player: 'O',
-                });
+        if(calculateWinner(squares) || squares[i]){
+            return;
         }
-        else
-        {
-            squares[i] = this.state.player;
-            this.setState({
-                player: 'X',
-                });
-        }
-        this.setState({squares: squares});
+        squares[i] = this.state.player ? 'X' : 'O';
+        this.setState({
+            squares: squares,
+            player: !this.state.player,
+        });
       }
 
     renderSquare(i) {
@@ -56,11 +62,17 @@ class Square extends React.Component {
     }
   
     render() {
-      const status = 'Next player: ';
-  
+      const winner = calculateWinner(this.state.squares);
+      let status;
+      if (winner){
+        status ='Winner: ' + winner;
+      } else {
+        status ='Next Player: ' + (this.state.player ? 'X' : 'O');
+      }
+
       return (
         <div>
-          <div className="status">{status}{this.state.player}</div>
+          <div className="status">{status}</div>
           <div className="board-row">
             {this.renderSquare(0)}
             {this.renderSquare(1)}
@@ -99,6 +111,26 @@ class Square extends React.Component {
   
   // ========================================
   
+  function calculateWinner(squares) {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return squares[a];
+      }
+    }
+    return null;
+  }
+
   ReactDOM.render(
     <Game />,
     document.getElementById('root')
