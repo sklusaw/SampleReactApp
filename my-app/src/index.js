@@ -5,7 +5,12 @@ import './index.css';
 class Square extends React.Component {
     render() {
       return (
-        <button className="square">
+          //The arrow function syntax shows that we're passing a function here. Rather than manually creating the function
+        <button 
+            className="square" 
+            //onXXXX represents the event itself
+            onClick={() =>  this.props.onClick()}
+        >
           {this.props.value}
         </button>
       );
@@ -13,16 +18,49 @@ class Square extends React.Component {
   }
   
   class Board extends React.Component {
+      constructor(props)
+      {
+          super(props);
+          this.state= {
+              squares: Array(9).fill(null),
+              player: 'X',
+        };
+      }
+
+      handleClick(i)
+      {
+        const squares = this.state.squares.slice();
+        if( this.state.player === 'X')
+        {
+            squares[i] = this.state.player;
+            this.setState({
+                player: 'O',
+                });
+        }
+        else
+        {
+            squares[i] = this.state.player;
+            this.setState({
+                player: 'X',
+                });
+        }
+        this.setState({squares: squares});
+      }
+
     renderSquare(i) {
-      return <Square value={i}/>;
+      return <Square 
+      value={this.state.squares[i]} 
+      //we are literally passing this function as a property to the child, so the parent can be modified by the child.
+      //handleXXXX represents Event handlers
+      onClick={() => this.handleClick(i)}/>;
     }
   
     render() {
-      const status = 'Next player: X';
+      const status = 'Next player: ';
   
       return (
         <div>
-          <div className="status">{status}</div>
+          <div className="status">{status}{this.state.player}</div>
           <div className="board-row">
             {this.renderSquare(0)}
             {this.renderSquare(1)}
