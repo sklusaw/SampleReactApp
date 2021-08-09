@@ -67,11 +67,19 @@ class Game extends React.Component {
         this.state = {
             history: [{ squares: Array(9).fill(null) }],
             player: true,
+            stepNumber: 0
         };
     }
 
+    jumpTo(step) {
+        this.setState({
+            stepNumber: step,
+            player: step % 2 === 0
+        });
+    };
+
     handleClick(i) {
-        const history = this.state.history;
+        const history = this.state.history.slice(0,this.state.stepNumber + 1);
         const current = history[history.length - 1];
         //slice makes a copy of the array so we dont have to make a immutable copy of the array
         const squares = current.squares.slice();
@@ -82,19 +90,39 @@ class Game extends React.Component {
         this.setState({
             history: history.concat([{ squares: squares, }]),
             player: !this.state.player,
+            stepNumber: history.length
         });
     }
 
     render() {
         const history = this.state.history;
-        const current = history[history.length - 1];
+        const current = history[this.state.stepNumber];
         const winner = calculateWinner(current.squares);
-        
+
+        const moves = history.map((step,move) => {
+            const desc = move ? 'go to move #' + move : 
+            'Go to game start'
+            return (
+                <li key={move}>
+                    <button onClick={ () => this.jumpTo(move)}>{desc}</button>
+                </li>
+
+            )
+        });
+
+
         let status;
         if (winner) {
             status = 'Winner: ' + winner;
         } else {
-            status = 'Next Player: ' + (this.state.player ? 'X' : 'O');
+            if(this.state.stepNumber === 9)
+            {
+                status = 'The Game Is A Tie!';
+            }
+            else 
+            {
+                status = 'Next Player: ' + (this.state.player ? 'X' : 'O');
+            }
         };
 
         return (
@@ -107,7 +135,7 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{status}</div>
-                    <ol>{/* TODO */}</ol>
+                    <ol>{moves}</ol>
                 </div>
             </div>
         );
